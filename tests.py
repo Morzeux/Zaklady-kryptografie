@@ -4,6 +4,7 @@ from crypto_helpers import solve_congruence_equation
 from crypto_helpers import euler_function
 from crypto_helpers import carmichael_function
 from crypto_helpers import solve_quadratic_equation
+from crypto_helpers import solve_chinese_remainder_theorem
 
 def unit_test(func):
     def wrapper(*args, **kwargs):
@@ -94,6 +95,16 @@ def test_solve_quadratic_equation():
     assert solve_quadratic_equation('x**2 = 1 mod 385') == sorted([1, 351, 34, 274, 76, 384, 111, 309])
     assert solve_quadratic_equation('x**2 = 1 mod 105') == sorted([1, 29, 41, 34, 64, 71, 76, 104])
     assert solve_quadratic_equation('x**2 = 1 mod 209') == sorted([1, 56, 153, 208])
+
+########## CHINESE REMAINDER THEOREM ##########
+
+@unit_test
+def test_solve_chinese_remainder_theorem():
+    assert solve_chinese_remainder_theorem(['x = 5 mod 7', 'x = 3 mod 11']) == 47
+    assert solve_chinese_remainder_theorem(['x = 5 mod 7', 'x = 3 mod 11', 'x = 10 mod 13']) == 894
+    assert solve_chinese_remainder_theorem(['x = 2 mod 5', 'x = 2 mod 7']) == 2
+    assert solve_chinese_remainder_theorem(['x = 2 mod 5', 'x = 2 mod 7', 'x = 4 mod 9']) == 247
+    assert solve_chinese_remainder_theorem(['x = 2 mod 4', 'x = 1 mod 5', 'x = 2 mod 7']) == 86
 
 ############## GLOBALS ##############
 

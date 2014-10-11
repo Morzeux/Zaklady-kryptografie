@@ -1,11 +1,11 @@
 from functools import reduce
-import re
+import re, math
 from math_helpers import gcd, multiply_matrix
 from math_helpers import split_number, to_histogram, lcm
 
 
-def find_multiplicative_inverse_element(element, z_value):
-    gcd_value, matrixes = gcd(z_value, element)
+def get_m_n_elements(element, z_value):
+    gcd_value, matrixes = gcd(element, z_value)
 
     if gcd_value is not 1:
         return None
@@ -13,8 +13,15 @@ def find_multiplicative_inverse_element(element, z_value):
     inverted_matrixes = [((0, 1), (1, -matrix[0][0])) for matrix in matrixes]
     inv_matrix = reduce(multiply_matrix, inverted_matrixes[::-1])
 
-    #m_val = inv_matrix[0][0]
-    n_val = inv_matrix[0][1]
+    return inv_matrix
+
+
+def find_multiplicative_inverse_element(element, z_value):
+    matrix = get_m_n_elements(element, z_value)
+    if matrix is None:
+        return None
+
+    n_val = matrix[0][1]
 
     return (z_value + n_val) % z_value
 
@@ -97,3 +104,33 @@ def solve_quadratic_equation(equation):
     
     a_val, b_val, m_val = [int(val) for val in equation.groups()]
     return [x for x in range(1, m_val) if is_solution(a_val, b_val, m_val, x)]
+
+
+
+def solve_chinese_remainder_theorem(equations):
+    EQUATION_RGX = r'x\s*=\s*(\d+)\s*mod\s*(\d+)'
+    values = []
+    for equation in equations:
+        result = re.match(EQUATION_RGX, equation)
+        if result is None:
+            raise ValueError("Equation must be 'x = a mod m' type!")
+        values.append([int(val) for val in result.groups()])
+
+    x_val = None
+    z_val = 1
+    for row in values:
+        a_val, m_val = row
+        if x_val is None:
+            x_val = a_val
+            z_val *= m_val
+            continue
+
+        matrix = get_m_n_elements(m_val, z_val)
+        if matrix is None:
+            return None
+
+        u_val = matrix[0][0] if int(math.fabs(matrix[1][0])) == m_val else matrix[0][1]
+        x_val = x_val + u_val * (a_val - x_val) * z_val
+        z_val *= m_val
+
+    return x_val % z_val
